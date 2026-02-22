@@ -1,0 +1,49 @@
+clear; clc;
+
+K  = 10;
+T  = 40;
+w0 = 2*pi/T;    
+k  = -K:K;
+
+X = zeros(size(k));   
+
+X(k==0) = 18/40;
+
+ii = find(k~=0);
+alpha = (k(ii))*w0;  
+
+X(ii) = (1/T) * ( ...
+    -(1/14) * ( ...
+        (1./(alpha.^2)) - ( exp( 1j*14*alpha) .* ( (-1j*14)./alpha + 1./(alpha.^2) ) ) ...
+    ) ...
+    + (2/11) * ( ...
+        ( exp(-1j*11*alpha) .* ( ( 1j*11)./alpha + 1./(alpha.^2) ) ) - (1./(alpha.^2)) ...
+    ) ...
+);
+
+t = -20:0.001:60;  
+xK = zeros(size(t));
+
+for n = 1:length(k)
+    xK = xK + X(n) * exp(1j*k(n)*w0*t);
+end
+
+xK = real(xK);
+
+figure;
+
+subplot(221);
+stem(k, abs(X), 'filled');
+grid on;
+title('|X_k|'); xlabel('k'); ylabel('magnitude');
+
+subplot(222);
+stem(k, angle(X), 'filled');
+grid on;
+title('∠X_k'); xlabel('k'); ylabel('radians');
+
+subplot(223);
+plot(t, xK);
+grid on;
+title(sprintf('x_K(t), K=%d (2 periods)',K));
+xlabel('t'); ylabel('x_K(t)');

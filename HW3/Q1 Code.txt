@@ -1,0 +1,24 @@
+omegap1 = 100; omegap2 = 250; omegas1 = 40; omegas2 = 500; omegap = 1;
+omegas = abs([omegap*(omegas1^2-omegap1*omegap2)/(omegas1*(omegap2-omegap1)),...
+    omegap*(omegas2^2-omegap1*omegap2)/(omegas2*(omegap2-omegap1))])
+
+omegas = min(omegas); alphap = 3; alphas = 17;
+K = ceil(log((10^(alphas/10)-1)/(10^(alphap/10)-1))/(2*log(omegas/omegap)))
+
+omegac = [omegap/(10^(alphap/10)-1).^(1/(2*K)),omegas/(10^(alphas/10)-1).^(1/(2*K))]
+
+omegac = mean(omegac); k = 1:K;
+pk = (1j*omegac*exp(1j*pi/(2*K)*(2*k-1))); A = poly(pk)
+
+a = 1; b = -pk*(omegap2-omegap1); c = omegap1*omegap2;
+pk = [(-b+sqrt(b.^2-4*a*c))./(2*a),(-b-sqrt(b.^2-4*a*c))./(2*a)];
+B = (omegac^K)*((omegap2-omegap1)^K)*poly(zeros(K,1)), A = poly(pk)
+
+omega = linspace(0,600,4001);
+H = polyval(B, 1j*omega) ./ polyval(A, 1j*omega);
+plot(omega, abs(H)); grid on;
+xline(40,'--'); xline(100,'--'); xline(250,'--'); xline(500,'--');
+xlabel("\omega")
+ylabel("|H(j\omega)|")
+title("Magnitude Response - Bandpass Butterworth")
+
