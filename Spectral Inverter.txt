@@ -1,0 +1,44 @@
+#include "MK22F51212.h"                  // Device header
+#include "MCG.h"                         // Clock header
+#include "TimerInt.h"                    // Timer Interrupt Header
+#include "ADC.h"                         // ADC Header
+#include "DAC.h"                         // DAC Header
+
+uint16_t adc_measurement;
+uint8_t flip = 0;
+int16_t inverter;
+uint16_t Result;
+
+void PIT0_IRQHandler(void){
+    PIT->CHANNEL[0].TFLG = PIT_TFLG_TIF_MASK;
+    NVIC_ClearPendingIRQ(PIT0_IRQn);
+	
+		ADC0->SC1[0] = ADC_SC1_ADCH(0x08); 
+		while(!((ADC0->SC1[0])&ADC_SC1_COCO_MASK));	
+		adc_measurement = ADC0->R[0];
+
+    inverter = adc_measurement - 2048;
+
+    if (flip){ 
+			inverter = -inverter;
+		}
+		
+		flip =!flip;
+		
+    Result = inverter + 2048;
+
+    DAC0->DAT[0].DATL = (Result & 0xFF);
+    DAC0->DAT[0].DATH = ((Result >> 8) & 0x0F);
+}
+
+int main(void){
+	MCG_Clock120_Init();
+	ADC_Init();
+	ADC_Calibrate();
+	DAC_Init();
+	TimerInt_Init();
+	
+	while(1){	
+		//Main loop goes here
+	}
+}
